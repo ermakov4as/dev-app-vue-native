@@ -3,6 +3,7 @@
         <ActionBar :title="title" class="action-bar" />
         <ScrollView>
             <StackLayout class="home-panel">
+
                 <!--Add your page content here-->
                 <template v-if="!loading">
                     <template v-if="!authorized">
@@ -12,7 +13,9 @@
                         <TextView hint="Логин (email)" keyboardType="email" v-model="email" />
                         <TextField secure="true" hint="Пароль" v-model="password" />
                         <Button text="Login" @tap="login" class="btn-big btn-green" />
+                        <Button text="Я уже зареган" @tap="sign_in" class="btn-big btn-green" />
                     </template>
+
                     <template v-else>
                         <Label textWrap="true" >
                             <FormattedString>
@@ -21,11 +24,15 @@
                             </FormattedString>
                         </Label>
                         <Button text="Logout" @tap="logout" class="btn-big btn-orange" />
+                        <Button text="Фэйк логаут" @tap="logout_nf" class="btn-big btn-orange" />
+                        <Button text="Отойти" @tap="test_sign_out" class="btn-big btn-orange" />
                     </template>
+
                 </template>
                 <ActivityIndicator v-else busy="true" />
-                <!--Label textWrap="true" :text="testInfo" class="h2 description-label error-label" /-->
-                <TextView hint="Test Name" v-model="testName" />
+                <Button text="Тест!" @tap="test_store" class="btn-common btn-blue" />
+                <Label textWrap="true" :text="test" class="h2 description-label error-label" />
+
             </StackLayout>
         </ScrollView>
     </Page>
@@ -44,48 +51,99 @@
                 password: null,//"H898E3us",
                 authorized: false,
                 nickname: null,
-                testName: ''/*,
-                testInfo: "Test Info"*/
+                test: "---"
             };
         },
         
         methods: {
+            test_store() {
+                this.test = this.$store.getters.name + ': ' + this.$store.getters.email;
+            },
+
+            logout_nf() {
+                LOGIN_HTTP.post('/logout/')
+                    .then((response) => {
+                        //this.$store.dispatch('remove_user_data');
+                        //this.$router.push('/login');
+                        //this.test_email = this.$store.getters.email;
+                        this.authorized = false;
+                    })
+                    .catch((error) => {
+                        console.dir(error);
+                    });
+            },
+
+            test_sign_out() {
+                this.authorized = false;
+            },
+
+            sign_in() {
+                HTTP.get('users/user/')
+                    .then((response) => {
+                            this.nickname = response.data.nickname;
+                            this.authorized = true;
+                            //this.loading = false;
+                            //this.$store.commit('user', response.data);
+                            //this.$router.push('/sciences/'); // TODO
+                    })
+                    .catch(error => {
+                            this.loading = false;
+                            this.reqError = true;
+                            console.dir(error);
+                    });
+            },
+
+            save(data) {
+                this.$store.dispatch("user_data", data);
+            },
+
+            load() {
+                this.$store.dispatch("query");
+            },
+
+            get_user_data() {
+                HTTP.get('users/user/')
+                    .then((response) => {
+                            this.nickname = response.data.nickname;
+                            this.authorized = true;
+                            this.loading = false;
+                            this.$store.commit('user', response.data);
+                            //this.$router.push('/sciences/'); // TODO
+                    })
+                    .catch(error => {
+                            this.loading = false;
+                            this.reqError = true;
+                            console.dir(error);
+                    });
+            },
+
             // Вход в аккаунт
             login() {
-                //console.log("Button was pressed");
                 if (this.email !== "" && this.password !== "") {
                     this.loading = true;
-                    this.testInfo = "Предзапрос"
                     // Запрос на авторизацию
                     LOGIN_HTTP.post("login/", {
                             email: this.email,
                             password: this.password
                         })
                         .then(response => {
-                            this.testInfo = "OK"
                             this.$store.commit('token', response.data['key']);
                             if (this.reqError) this.reqError = false;
-                            HTTP.get('users/user/')
-                                    .then((response) => {
-                                        this.nickname = response.data.nickname;
-                                        this.authorized = true;
-                                        this.loading = false;
-                                        this.$store.commit('user', response.data);
-                                        //this.$router.push('/sciences/'); //TODO
-                                    })
-                                    .catch(error => {
-                                        this.loading = false;
-                                        this.reqError = true;
-                                        console.dir(error);
-                                    });
+                            this.get_user_data();
+                            if (this.authorized) {
+                                let user_data = {
+                                    name: this.nickname,
+                                    email: this.email,
+                                    token: response.data['key']
+                                }
+                                this.save(user_data);
+                            }
                         })
                         .catch(error => {
                             this.loading = false;
                             this.reqError = true;
                             console.dir(error);
-                            //this.set_errors(error.response.data);
                             this.password = null;
-                            //this.state = "default";
                         });
                 }
             },
@@ -94,7 +152,7 @@
             logout() {
                 LOGIN_HTTP.post('/logout/')
                     .then((response) => {
-                        this.$store.dispatch('logout');
+                        this.$store.dispatch('remove_user_data');
                         //this.$router.push('/login');
                         this.authorized = false;
                     })
@@ -104,10 +162,17 @@
             }
         },
 
-        computed: {
-            connected_to_server() {
-                return this.$store.getters.connected_to_server;
+        mounted() {
+            this.load();
+            let tmp_token = this.$store.getters.token;
+            if (tmp_token !== null & tmp_token !== "") {
+                this.loading = true;
+                this.get_user_data();
             }
+        },
+
+        created() {
+            this.$store.dispatch("init");
         }
     };
 </script>
@@ -143,6 +208,7 @@
         border-radius: 3px;
         font-weight: 500;
         color: white;
+        margin: 3px;
     }
 
     .btn-common {

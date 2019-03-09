@@ -1,70 +1,100 @@
-// Вставить ли БД ???
+const Sqlite = require("nativescript-sqlite")
+
 const state = {
-    _user: null,
-    _token: null,
-    _connected_to_server: false
+    database: null,
+    data: [{
+        name: "",
+        email: "",
+        token: ""
+    }]
 };
 
 const getters = {
+    name(state) {
+        return state.data[0].name;
+    },
+
+    email(state) {
+        return state.data[0].email;
+    },
+
     token(state) {
-        return state._token //|| Cookies.get('se_token');
-    },
-
-    user(state) {
-        return state._user;
-    },
-
-    is_logged(state) {
-        return state._user !== null
-    },
-
-    connected_to_server(state) {
-        return state._connected_to_server;
+        return state.data[0].token;
     }
 };
 
 const mutations = {
-    // Записывает токен в хранилище и в кукиз
-    token(state, token) {
-        state._token = token;
-        //Cookies.set('se_token', token);
+    init(state, data) {
+        state.database = data.database;
     },
-    remove_token(state) {
-        state._token = null;
-        //Cookies.remove('se_token');
-    },
-    // Записываем данные пользователя в хранилище и в кукиз
-    user(state, user) {
-        state._user = user;
-        //Cookies.set('se_user', user);
-    },
-    remove_user(state, user) {
-        state._user = null;
-        //Cookies.remove('se_user');
-    },
-    // Записываем состояние подключения к серверу в хранилище
-    connected_to_server(state, conn) {
-        state._connected_to_server = conn;
-    }
-    /*,
 
-        // При отсутствии данных в хранилище - пробуем извлечь их из кукиз
-        checkCookies(state) {
-            if (state._user === null) {
-                let userData = Cookies.get('se_user');
-                if (userData) {
-                    state._user = JSON.parse(userData);
-                }
-            }
-        }*/
+    load(state, data) {
+        state.data = [];
+        for (var i = 0; i < data.data.length; i++) {
+            state.data.push({
+                name: data.data[i][0],
+                email: data.data[i][1],
+                token: data.data[i][2],
+            });
+        }
+    },
+
+    save(state, data) {
+        state.data.push({
+            name: data.data.name,
+            email: data.data.email,
+            token: data.data.token
+        });
+    },
+
+    remove(state) {
+        state.data[0].name = "";
+        state.data[0].email = "";
+        state.data[0].token = "";
+    },
 };
 
 const actions = {
-    // Обнуляем данные в хранилище и удаляем токен из кукиз при выходе из аккаунта
-    logout(context) {
-        context.commit('remove_token');
-        context.commit('remove_user');
+    init(context) {
+        (new Sqlite("app.db")).then(db => {
+            db.execSQL("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, token TEXT)")
+                .then(id => {
+                    context.commit("init", { database: db });
+                }, error => {
+                    console.dir("CREATE TABLE ERROR", error);
+                });
+        }, error => {
+            console.dir("OPEN DB ERROR", error);
+        });
+    },
 
+    user_data(context, data) {
+        context.state.database.execSQL("INSERT INTO users (name, email, token) VALUES (?, ?, ?)", [data.name, data.email, data.token])
+            .then(id => {
+                context.commit("save", { data: data });
+            }, error => {
+                console.dir("INSERT ERROR", error);
+            });
+    },
+
+    remove_user_data(context) {
+        context.state.database.run("DELETE FROM users")
+            .then(id => {
+                context.commit("remove");
+            }, error => {
+                console.dir("DELETE ERROR", error);
+            });
+    },
+
+    query(context) {
+        setTimeout(() => {
+            context.state.database.all("SELECT IF EXISTS name, email, token FROM users", [])
+                .then(result => {
+                    context.commit("load", { data: result });
+                }, error => {
+                    console.dir("SELECT ERROR", error);
+                });
+        }, 4)
     }
 };
 
