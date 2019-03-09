@@ -1,100 +1,72 @@
-const Sqlite = require("nativescript-sqlite")
+const appSettings = require("application-settings");
 
 const state = {
-    database: null,
-    data: [{
-        name: "",
-        email: "",
-        token: ""
-    }]
+    data: {
+        name: null,
+        email: null,
+        token: null
+    }
 };
 
 const getters = {
     name(state) {
-        return state.data[0].name;
+        return state.data.name;
     },
 
     email(state) {
-        return state.data[0].email;
+        return state.data.email;
     },
 
     token(state) {
-        return state.data[0].token;
+        return state.data.token;
     }
 };
 
 const mutations = {
-    init(state, data) {
-        state.database = data.database;
-    },
-
     load(state, data) {
-        state.data = [];
-        for (var i = 0; i < data.data.length; i++) {
-            state.data.push({
-                name: data.data[i][0],
-                email: data.data[i][1],
-                token: data.data[i][2],
-            });
-        }
+        state.data = data;
     },
 
     save(state, data) {
-        state.data.push({
-            name: data.data.name,
-            email: data.data.email,
-            token: data.data.token
-        });
+        state.data = {
+            name: data.name,
+            email: data.email,
+            token: data.token
+        };
     },
 
     remove(state) {
-        state.data[0].name = "";
-        state.data[0].email = "";
-        state.data[0].token = "";
+        state.data.name = null;
+        state.data.email = null;
+        state.data.token = null;
     },
 };
 
 const actions = {
     init(context) {
-        (new Sqlite("app.db")).then(db => {
-            db.execSQL("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, token TEXT)")
-                .then(id => {
-                    context.commit("init", { database: db });
-                }, error => {
-                    console.dir("CREATE TABLE ERROR", error);
-                });
-        }, error => {
-            console.dir("OPEN DB ERROR", error);
-        });
+        let _name = appSettings.getString("user_name", null);
+        let _email = appSettings.getString("user_email", null);
+        let _token = appSettings.getString("user_token", null);
+        let user_settings = {
+            name: _name,
+            email: _email,
+            token: _token
+        };
+        context.commit("load", user_settings);
     },
 
     user_data(context, data) {
-        context.state.database.execSQL("INSERT INTO users (name, email, token) VALUES (?, ?, ?)", [data.name, data.email, data.token])
-            .then(id => {
-                context.commit("save", { data: data });
-            }, error => {
-                console.dir("INSERT ERROR", error);
-            });
+        appSettings.setString("user_name", data.name);
+        appSettings.setString("user_email", data.email);
+        appSettings.setString("user_token", data.token);
+        context.commit("save", data);
     },
 
     remove_user_data(context) {
-        context.state.database.run("DELETE FROM users")
-            .then(id => {
-                context.commit("remove");
-            }, error => {
-                console.dir("DELETE ERROR", error);
-            });
-    },
-
-    query(context) {
-        setTimeout(() => {
-            context.state.database.all("SELECT IF EXISTS name, email, token FROM users", [])
-                .then(result => {
-                    context.commit("load", { data: result });
-                }, error => {
-                    console.dir("SELECT ERROR", error);
-                });
-        }, 4)
+        appSettings.remove("user_name");
+        appSettings.remove("user_email");
+        appSettings.remove("user_token");
+        context.commit("remove");
     }
 };
 
