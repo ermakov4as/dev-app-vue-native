@@ -106,6 +106,8 @@
                         this.$store.dispatch('remove_user_data');
                         //this.$router.push('/login'); // TODO:
                         this.authorized = false;
+                        this.email = null;
+                        this.password = null;
                     })
                     .catch((error) => {
                         console.dir(error);
