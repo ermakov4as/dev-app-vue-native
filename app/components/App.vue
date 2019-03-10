@@ -1,20 +1,35 @@
 <template>
     <Page>
-        <ActionBar title="Welcome to NativeScript-Vue!"/>
-        <GridLayout columns="*" rows="*">
+        <!--ActionBar title="Welcome to NativeScript-Vue!"/-->
+        <ActionBar :title="$route.path" />
+        <ScrollView>
+            <router-view />
+        </ScrollView>
+        <!--router-viev></router-viev-->
+        <!--GridLayout columns="*" rows="*">
             <Label class="message" :text="msg" col="0" row="0"/>
-        </GridLayout>
+        </GridLayout-->
     </Page>
 </template>
 
 <script >
-  export default {
-    data() {
-      return {
-        msg: 'Hello World!'
-      }
+    //import Home from './Home.vue'
+
+    export default {
+        data() {
+            return {
+                //msg: 'Hello World!'
+            }
+        },
+
+        /*components: {
+            Home
+        },*/
+
+        mounted() {
+            this.$router.replace('/home');
+        }
     }
-  }
 </script>
 
 <style scoped>

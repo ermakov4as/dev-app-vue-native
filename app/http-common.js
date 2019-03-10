@@ -50,7 +50,7 @@ HTTP.interceptors.request.use(
 HTTP.interceptors.response.use(null, function(error) {
     if (error.response.status === 401 || error.response.status === 403) {
         console.dir(`Failed to login (error: ${error.response.status})`);
-        //router.push('/login'); // TODO
+        //router.push('/login'); // TODO:
     };
     return Promise.reject(error)
 });

@@ -27,6 +27,7 @@
 
                 </template>
                 <ActivityIndicator v-else busy="true" />
+                <Button text="To Home" @tap="$router.push('/home')" />
 
             </StackLayout>
         </ScrollView>
