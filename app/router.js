@@ -1,15 +1,13 @@
 import Home from './components/Home.vue';
-import Login from './components/HelloWorld.vue';
-//const Vue = require('nativescript-vue');
-//const VueRouter = require('vue-router');
+import Login from './components/Login.vue';
+import Player from './components/Player.vue';
+import Trainer from './components/Trainer.vue';
 import Vue from 'vue';
 import Router from 'vue-router';
 
-//Vue.use(VueRouter);
 Vue.use(Router);
 
 export default new Router({
-    //const router = new VueRouter({
     //mode: history,
     pageRouting: true,
     routes: [{
@@ -19,10 +17,18 @@ export default new Router({
         },
         {
             path: '/login',
-            name: login,
+            name: 'login',
             component: Login
-                /*component: () =>
-                    import ('./components/HelloWorld.vue')*/ // Isn't availible
+        },
+        {
+            path: '/player',
+            name: 'player',
+            component: Player
+        },
+        {
+            path: '/trainer',
+            name: 'trainer',
+            component: Trainer
         },
         {
             path: '*',

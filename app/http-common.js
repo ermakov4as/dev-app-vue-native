@@ -14,14 +14,14 @@ export const HTTP = axios.create({
     }
 });
 
-/*// Стандартный HTTP запрос для загрузки
+// Стандартный HTTP запрос для загрузки
 export const HTTP_UPLOAD = axios.create({
     baseURL: API_URL,
     headers: {
         "Content-Type": "multipart/form-data",
         "Authorization": `Bearer ${store.getters.token}`
     }
-});*/
+});
 
 // HTTP запрос для авторизации
 export const LOGIN_HTTP = axios.create({

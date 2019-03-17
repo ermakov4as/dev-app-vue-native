@@ -28,13 +28,17 @@
 
         mounted() {
             this.$router.replace('/home');
+        },
+
+        created() {
+            this.$store.dispatch("init");
         }
     }
 </script>
 
-<style scoped>
+<style>
     ActionBar {
-        background-color: #53ba82;
+        background-color: #e53142;
         color: #ffffff;
     }
 
