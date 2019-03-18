@@ -5,6 +5,11 @@
 @import '~nativescript-theme-core/scss/index';
 // Global SCSS styling
 // @see https://docs.nativescript.org/ui/styling
+.success-label {
+    color: #4ca64c;
+    font-style: italic;
+}
+
 .switch-line {
     margin-bottom: 10px;
 }
@@ -20,6 +25,7 @@
     padding-bottom: 2px;
     background-color: lightcyan;
     color: black;
+    /*height: 15px;*/
 }
 
 .border-red {
