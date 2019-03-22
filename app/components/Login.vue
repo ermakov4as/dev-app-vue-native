@@ -4,15 +4,22 @@
         <ScrollView>
             <StackLayout class="home-panel">
 
+                <!-- Отображается если не идёт загрузка -->
                 <template v-if="!loading">
+
+                    <!-- Блок сообщения об ошибке -->
                     <template v-if="reqError">
                         <label textWrap="true" text="Ошибка регистрации" class="h2 description-label error-label" />
                     </template>
+
+                    <!-- Форма для авторизации -->
                     <TextView hint="Логин (email)" keyboardType="email" v-model="email" />
                     <TextField secure="true" hint="Пароль" v-model="password" />
                     <Button text="Login" @tap="login" class="btn-big btn-green" />
+
                 </template>
 
+                <!-- Индикатор загрузки -->
                 <ActivityIndicator v-else busy="true" />
 
             </StackLayout>
@@ -35,15 +42,16 @@
         },
         
         methods: {
+            // Сохранение данных пользователя
             save(data) {
                 this.$store.dispatch("user_data", data);
             },
 
+            // Запрос на получение данных пользователя с сервера
             get_user_data(token) {
                 HTTP.get('users/user/')
                     .then((response) => {
                             this.loading = false;
-                            //this.$router.push('/sciences/'); // TODO:
                             if (token !== null) {
                                 let user_data = {
                                     name: response.data.nickname,
@@ -52,6 +60,7 @@
                                 }
                                 this.save(user_data);
                             }
+                            // Переход на главную страницу приложения
                             this.$router.push('/home');
                     })
                     .catch(error => {
@@ -61,8 +70,9 @@
                     });
             },
 
-            // Вход в аккаунт
+            // Авторизация
             login() {
+                // Проверка, что поля логина и пароля не пустые
                 if (this.email !== "" && this.password !== "") {
                     this.loading = true;
                     // Запрос на авторизацию
@@ -81,14 +91,6 @@
                             this.password = null;
                         });
                 }
-            }
-        },
-
-        mounted() {
-            let tmp_token = this.$store.getters.token;
-            if (tmp_token !== null & tmp_token !== "") { // TODO: в перспективе не будет нужно
-                this.loading = true;
-                this.get_user_data(null);
             }
         }
     };

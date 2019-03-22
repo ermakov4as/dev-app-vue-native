@@ -4,18 +4,24 @@
         <ScrollView>
             <StackLayout class="home-panel">
 
+                <!-- Отображается если не идёт загрузка -->
                 <template v-if="!loading">
+
+                    <!-- Блок сообщения об ошибке -->
                     <template v-if="loadError">
                         <label textWrap="true" text="Ошибка при загрузке" class="h2 description-label error-label" />
                     </template>
 
+                    <!-- Отображается при отсутствии ошибки загрузки -->
                     <template v-else>
 
+                        <!-- Блок выбора урока -->
                         <template v-if="showLessons">
                             <label textWrap="true" text="Выберите урок:" class="h2 description-label" />
+
+                            <!-- Список доступных уроков -->
                             <ListView for="lesson in lessons" class="list-group">
                                 <v-template>
-                                    <!--Label :text="lesson.name" class="btn-list btn-grey" @tap="lessonChecked(lesson.id)" /-->
                                     <StackLayout class="list-group-item" v-if="lesson">
                                         <Button v-if="lesson.new" :text="lesson.name" 
                                                 @tap="lessonChecked(lesson.id)" class="btn-list-red btn-grey" />
@@ -24,10 +30,14 @@
                                     </StackLayout>
                                 </v-template>
                             </ListView>
+
                         </template>
 
+                        <!-- Блок выбора карточки -->
                         <StackLayout v-else-if="showCards">
                             <label textWrap="true" text="Выберите карточку:" class="h2 description-label" />
+
+                            <!-- Блок доступных карточек -->
                             <ListView for="card in cards" class="list-group" row="1" col="0">
                                 <v-template>
                                     <StackLayout class="list-group-item">
@@ -35,24 +45,37 @@
                                     </StackLayout>
                                 </v-template>
                             </ListView>
+
+                            <!-- Возврат к выбору урока -->
                             <Button text="К выбору урока" @tap="reward('cards-lessons')" class="btn-common btn-violet" />
                         </StackLayout>
 
+                        <!-- Блок собственно тренажёра -->
                         <StackLayout v-else-if="showPlayer">
+
+                            <!-- 2 класса для создания рамки -->
                             <StackLayout class="border-red">
                                 <StackLayout class="border-imitate">
 
+                                    <!-- Режим работы с тренажёром -->
                                     <template v-if="!cardSuccessMode">
+
+                                        <!-- Название карточки и номер предложения среди доступных в карточке -->
                                         <label textWrap="true" :text="cardName + ` (${currentNum}/${maxNum})`" 
                                                 class="h2 description-label no-bottom-mr" />
+
+                                        <!-- Сообщение при успешном сохранении карточки -->
                                         <label v-if="cardSaved" textWrap="true" text="Карточка успешно сохранена!" 
                                                 class="h2 description-label no-bottom-mr success-label" />
+
+                                        <!-- Выбор порядка следования языков: АНГЛ-РУС или РУС-АНГЛ -->
                                         <FlexboxLayout  class="switch-line" flexDirection="row-reverse">
                                             <Label text="EN-RU" />
                                             <Switch v-model="enRu" />
                                             <Label text="RU-EN" />
                                         </FlexboxLayout>
 
+                                        <!-- Преддожение, перевод и озвучка при выборе порядка АНГЛ-РУС -->
                                         <template v-if="enRu">
                                             <FlexboxLayout  class="label-margin">
                                                 <Image src="~/assets/images/audio-volume.png" stretch="aspectFit" class="icon" width="50" 
@@ -70,6 +93,7 @@
                                             </FlexboxLayout>
                                         </template>
 
+                                        <!-- Предложение, перевод и озвучка при выборе порядка РУС-АНГЛ -->
                                         <template v-else>
                                             <FlexboxLayout class="label-margin">
                                                 <Image src="~/assets/images/audio-volume.png" stretch="aspectFit" class="icon" width="50" 
@@ -87,39 +111,49 @@
                                             </FlexboxLayout>
                                         </template>
 
+                                        <!-- Блок перемещения по предложениям карточки и поэтапного прохождения далее -->
                                         <GridLayout rows="auto" columns="*, *, *">
                                             <Button text="<-" @tap="prevSentence" class="btn-common btn-white" row="0" col="0" />
                                             <Button text="Далее" @tap="further" class="btn-common btn-green" row="0" col="1" />
                                             <Button text="->" @tap="nextSentence" class="btn-common btn-white" row="0" col="2" />
                                         </GridLayout>
+
                                     </template>
 
+                                    <!-- Режим сохранения информации о пройденной карточке на сервере -->
                                     <template v-else>
                                         <label textWrap="true" :text="`Отметить карточку '${cardName}' как прослушанную?`" 
                                                 class="h2 description-label no-bottom-mr" />
                                         <label v-if="cardSaveError" textWrap="true" 
                                                 text="Ошибка при сохранении" class="h2 description-label error-label" />
+
+                                        <!-- Блок подтверждения отправки запроса на сохранение -->
                                         <GridLayout rows="auto" columns="*, *">
                                             <Button text="Да" @tap="cardSuccess" class="btn-big btn-green" row="0" col="0" />
                                             <Button text="Нет" @tap="cardSuccessReject" class="btn-big btn-orange" row="0" col="1" />
                                         </GridLayout>
+
                                     </template>
 
                                 </StackLayout>
                             </StackLayout>
-                            <!--Image src="~/assets/images/Swift English.png" stretch="aspectFill" /-->
+
+                            <!-- Блок возврата к выбору урока или карточки -->
                             <GridLayout rows="auto" columns="*, *">
                                 <Button text="Карточки" @tap="reward('player-cards')" class="btn-common btn-violet" row="0" col="0" />
                                 <Button text="Уроки" @tap="reward('player-lessons')" class="btn-common btn-violet" row="0" col="1" />
                             </GridLayout>
+
                         </StackLayout>
 
                     </template>
 
                 </template>
 
+                <!-- Индикатор загрузки -->
                 <ActivityIndicator v-else busy="true" />
 
+                <!-- Возврат на главную страницу; кнопка всегда активна -->
                 <Button text="На Главную" @tap="$router.push('/home')" class="btn-big btn-orange" />
 
             </StackLayout>
@@ -136,7 +170,6 @@
             return {
                 title: "Тренажёр",
                 loading: true,
-                preLoading: 0,
                 loadError: false,
                 cardTitle: "",
                 cardId: null,
@@ -161,12 +194,14 @@
         },
         
         methods: {
+            // Выход из режима сохранения информации о пройденной карточке без её сохранения
             cardSuccessReject() {
                 this.cardSuccessMode = false;
                 this.cardSaveError = false;
             },
 
-            cardSuccess() {
+            // Запрос к серверу на сохранение информации о пройденной карточке
+            cardSuccess() {                         // TODO: проверить работу запроса
                 this.loading = true;
                 HTTP.post(`player/card/${this.cardId}/success/`)
                     .then((response) => {
@@ -182,6 +217,7 @@
                 
             },
 
+            // Действия по кнопке "Далее": предложение* - озвучка - перевод* - озвучка - переход к следующему
             further() {
                 this.futherStage += 1;
                 if (this.futherStage === 1) {
@@ -209,6 +245,7 @@
                 }
             },
 
+            // Возврат к предыдущему предложению в карточке
             prevSentence() {
                 this.cardSaved = false;
                 if (this.currentNum > 1) {
@@ -222,6 +259,7 @@
                 }
             },
 
+            // Переход к следующему предложению в карточке
             nextSentence() {
                 this.cardSaved = false;
                 if (this.currentNum < this.maxNum) {
@@ -233,10 +271,12 @@
                     this.showB = false;
                     this.loading = false;
                 } else if (this.currentNum === this.maxNum) {
+                    // Переход в режим сохранения информации о пройденной карточке
                     this.cardSuccessMode = true;    
                 }
             },
 
+            // Воспроизведение аудиофайла
             playAudio(source) {
                 const player = new audio.TNSPlayer();
                 const playerOptions = {
@@ -252,7 +292,6 @@
                         console.dir(JSON.stringify(args));
                     }
                 };
-                
                 player
                     .playFromUrl(playerOptions)
                     .then(function(res) {
@@ -263,6 +302,7 @@
                     });
             },
 
+            // Обработка возврата к предыдущим режимам выбора
             reward(mode) {
                 this.loading = true;
                 this.cardSaved = false;
@@ -280,6 +320,7 @@
                 this.loading = false;
             },
 
+            // Выбор карточки, подготовка количества предложений в ней и запрос на получение данных карточки
             cardChecked(id) {
                 this.cards.forEach((card, i, cards) => {
                     if (card.id === id) {
@@ -293,6 +334,7 @@
                 });
             },
             
+            // Выбор урока и подготовка его карточек к отображению
             lessonChecked(id) {
                 this.lessons.forEach((lesson, i, lessons) => {
                     if (lesson.id === id) {
@@ -305,6 +347,7 @@
                 });
             },
 
+            // Запрос к серверу на получение предложений для тренировки
             getPlayerCard(id) {
                 HTTP.get(`player/card/${id}/`)
                     .then((response) => {
@@ -312,7 +355,7 @@
                         this.sentences = response.data.sentences;
                         this.sentence = response.data.sentences[0];
                         this.currentNum = 1;
-                        this.preLoading += 1;
+                        this.loading = false;
                     })
                     .catch(error => {
                         this.loadError = true;
@@ -321,6 +364,7 @@
                     });
             },
 
+            // Запрос к серверу на получение списка уроков с карточками для тренировок
             getPlaylist() {
                 HTTP.get('player/playlist/')
                     .then((response) => {
@@ -333,43 +377,12 @@
                         this.loading = false;
                         console.dir(error);
                     });
-            },
-
-            getSettings() {                             // TODO: что означает несколько объектов в массивах ruen и enru?
-                HTTP.get('player/settings/')            // TODO: соответственно, сделать получение и сохранение
-                    .then((response) => {
-                        console.dir('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
-                        console.dir(response.data);
-                        console.dir('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
-                        this.preLoading += 1;
-                    })
-                    .catch(error => {
-                        this.loadError = true;
-                        this.loading = false;
-                        console.dir(error);
-                    });
-            }
-        },
-
-        watch: {
-            enRu: {                             // TODO: и что здесь должно быть?
-                handler(val, oldVal) {
-                    console.dir(this.enRu);
-                }
-            },
-
-            preLoading: {
-                handler(val, oldVal) {
-                    if (this.preLoading === 2) {
-                        this.loading = false;
-                    }
-                }
             }
         },
 
         created() {
+            // Получение списка уроков с карточками для тренировок при загрузке
             this.getPlaylist();
-            this.getSettings();
         }
     };
 </script>

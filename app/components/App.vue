@@ -1,36 +1,24 @@
 <template>
     <Page>
-        <!--ActionBar title="Welcome to NativeScript-Vue!"/-->
         <ActionBar :title="$route.path" />
         <ScrollView>
+
+            <!-- Отображаем текущий компонент роутера -->
             <router-view />
+
         </ScrollView>
-        <!--router-viev></router-viev-->
-        <!--GridLayout columns="*" rows="*">
-            <Label class="message" :text="msg" col="0" row="0"/>
-        </GridLayout-->
     </Page>
 </template>
 
 <script >
-    //import Home from './Home.vue'
-
     export default {
-        data() {
-            return {
-                //msg: 'Hello World!'
-            }
-        },
-
-        /*components: {
-            Home
-        },*/
-
         mounted() {
+            // Инициируем переход на главную страницу
             this.$router.replace('/home');
         },
 
         created() {
+            // При включении загружаем в хранилище данные пользователя
             this.$store.dispatch("init");
         }
     }
